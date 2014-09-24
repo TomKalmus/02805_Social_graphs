@@ -2,6 +2,7 @@ import twitter
 import json
 import pymongo
 from pymongo import Connection
+import sys
 
 def oauth_login():
     CONSUMER_KEY = ''

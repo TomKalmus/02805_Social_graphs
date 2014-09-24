@@ -181,13 +181,22 @@ def harvest_user_description(twitter_api, q='followback', max_results=30):
 
     return results[:max_results]
 
+'''
+Function for following users given in a list. It used after finding users with 'followback' in their description.
+Can sometimes throw errors, because of some twitter error, which can't be solved
+'''
 def follow_account(twitter_api, users):
     for user in users:
         try:
             make_twitter_request(twitter_api.friendships.create, user_id=user["id"])
         except Exception, e:
             print "Error\n", e
-
+            
+'''
+Function to unfollow users, who haven't followed us back. We first check the users that we have followed last time,
+and check if these users followed us back. If not, we unfollow them. Afterwards we clean the database for the next 
+pack of users
+'''
 def check_good_followers(twitter_api):
     followers = make_twitter_request(twitter_api.followers.ids, screen_name='Awe5omeMike')["ids"]
 

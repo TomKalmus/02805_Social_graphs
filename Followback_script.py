@@ -4,10 +4,10 @@ import pymongo
 from pymongo import Connection
 
 def oauth_login():
-    CONSUMER_KEY = 'CyAip6p31NAft9oaxzOQ6oB8J'
-    CONSUMER_SECRET = 'SQNoR3rSI48CQJNRp0JiYvtjUbO8N92vOp2E6FaziqWs41ZmaQ'
-    OAUTH_TOKEN = '2787485978-M79tv9HsEksFY4CiVDcFyUaU966coOAbILBvjaH'
-    OAUTH_TOKEN_SECRET = 'Nb47C3HKCqZbCSymCos43R0p2T2W6apMp0PYfaQPTl1Qq'
+    CONSUMER_KEY = ''
+    CONSUMER_SECRET = ''
+    OAUTH_TOKEN = ''
+    OAUTH_TOKEN_SECRET = ''
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET,
                                CONSUMER_KEY, CONSUMER_SECRET)
     twitter_api = twitter.Twitter(auth=auth)
@@ -179,18 +179,19 @@ def harvest_user_description(twitter_api, q='followback', max_results=50):
     return results[:max_results]
     
 def follow_account(twitter_api, users):
-    [ twitter_api.friendships.create(user_id=user["id"])
-         for user in users ]
+    for user in users:
+        make_twitter_request(twitter_api.friendships.create, user_id=user["id"])
 
 def check_good_followers(twitter_api):
-    [ twitter_api.friendships.destroy(user_id=user["id"])
-                for user in load_from_mongo('search_results', 'last_trial')
-                     if not twitter_api.friendships.show(source_screen_name='Awe5omeMike', 
-                                target_id=user["id"])["relationship"]["source"]["followed_by"] ]
-    
+    for user in load_from_mongo('search_results', 'last_trial'):
+        if not twitter_api.friendships.show(source_screen_name='Awe5omeMike',  # change to your screen name
+                        target_id=user["id"])["relationship"]["source"]["followed_by"]:
+            make_twitter_request(twitter_api.friendships.destroy, user_id=user["id"])
+
     # Clear "last trial" collection for next users
     c = Connection()
     c['search_results'].drop_collection('last_trial')
+
 
 twitter_api = oauth_login()
 

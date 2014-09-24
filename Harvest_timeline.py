@@ -3,6 +3,8 @@
 Created on Mon Sep 22 19:11:53 2014
 
 @author: tomek
+
+Script for getting tweets from your timeline and save them in a mongoDB database
 """
 
 import twitter
@@ -197,14 +199,8 @@ def harvest_home_timeline(twitter_api, max_results=1000):
     print >> sys.stderr, 'Done fetching tweets'
 
     return results[:max_results]
-    
-# def get_home_timeline(twitter_api, count=2, since_id=None, exclude_replies=True):
-#    search_results = twitter_api.statuses.home_timeline(count=count)
-#    
-#    return search_results
 
 twitter_api = oauth_login()
 results = harvest_home_timeline(twitter_api)
 
 save_to_mongo(results, 'search_results', 'tweets')
-# load_from_mongo('search_results', 'tweets')

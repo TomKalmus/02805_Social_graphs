@@ -133,62 +133,70 @@ limit of the API. These are the following steps:
     6) In loop get tweets as long as the limits have not been reached
     7) return list with tweets
 '''
-def harvest_user_description(twitter_api, q='followback', max_results=50):
+def harvest_user_description(twitter_api, q='followback', max_results=30):
     kw = {  # Keyword args for the Twitter API call
         'count': 20, # max in API
         'q': q,
         'page' : 1
         }
-    
+
     max_pages = 16
     results = []
-    
+
     search_results = make_twitter_request(twitter_api.users.search, **kw)
-    
-    users = [dict([('screen_name', user["screen_name"]), ('id', user["id"])]) 
+
+    users = [dict([('screen_name', user["screen_name"]), ('id', user["id"])])
                        for user in search_results ]
-    
-    DB_users = [dict([('screen_name', user["screen_name"]), ('id', user["id"])]) 
+
+    DB_users = [dict([('screen_name', user["screen_name"]), ('id', user["id"])])
                     for user in load_from_mongo('search_results', 'followed') ]
-    
-    not_followed = [ user for user in users if user not in DB_users ]
+
+    followed = make_twitter_request(twitter_api.friends.ids, screen_name='Awe5omeMike')["ids"]
+
+    not_followed = [ user for user in users if user not in DB_users and user["id"] not in followed]
 
     results += not_followed
-    
+
     page_num = kw["page"]+1
-    
+
     while page_num < max_pages and len(results) < max_results:
-    
+
         # Necessary for traversing the timeline in Twitter's v1.1 API:
         # get the next query's max-id parameter to pass in.
         # See https://dev.twitter.com/docs/working-with-timelines. 
         kw["page"] = page_num
-        
+
         search_results = make_twitter_request(twitter_api.users.search, **kw)
-        
-        users = [dict([('screen_name', user["screen_name"]), ('id', user["id"])]) 
+
+        users = [dict([('screen_name', user["screen_name"]), ('id', user["id"])])
                        for user in search_results ]
-        
-        not_followed = [ user for user in users if user not in DB_users ]
-        
+
+        not_followed = [ user for user in users if user not in DB_users and user["id"] not in followed ]
+
         results += not_followed
 
         print >> sys.stderr, 'Fetched %i users' % (len(not_followed),)
-    
+
         page_num += 1
-            
+
     return results[:max_results]
-    
+
 def follow_account(twitter_api, users):
     for user in users:
-        make_twitter_request(twitter_api.friendships.create, user_id=user["id"])
+        try:
+            make_twitter_request(twitter_api.friendships.create, user_id=user["id"])
+        except Exception, e:
+            print "Error\n", e
 
 def check_good_followers(twitter_api):
-    for user in load_from_mongo('search_results', 'last_trial'):
-        if not twitter_api.friendships.show(source_screen_name='Awe5omeMike',  # change to your screen name
-                        target_id=user["id"])["relationship"]["source"]["followed_by"]:
-            make_twitter_request(twitter_api.friendships.destroy, user_id=user["id"])
+    followers = make_twitter_request(twitter_api.followers.ids, screen_name='Awe5omeMike')["ids"]
 
+    for user in load_from_mongo('search_results', 'last_trial'):
+        if user["id"] not in followers:
+            try:
+                make_twitter_request(twitter_api.friendships.destroy, user_id=user["id"])
+            except Exception, e:
+                print "Error\n", e
     # Clear "last trial" collection for next users
     c = Connection()
     c['search_results'].drop_collection('last_trial')

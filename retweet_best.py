@@ -33,8 +33,11 @@ def get_max_retweeted(data):
 def retweet_best_tweet(twitter_api, tweet):
     if tweet is None:
         return
-
-    retweeted = twitter_api.statuses.retweet(id=tweet["tweet_id"])
+    
+    try:
+        retweeted = twitter_api.statuses.retweet(id=tweet["tweet_id"])
+    except Exception, e:
+        print "Error\n", e
 
 twitter_api = oauth_login()
 

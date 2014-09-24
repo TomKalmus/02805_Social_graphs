@@ -1,3 +1,9 @@
+'''
+Script for getting the most retweeted tweet from your timeline and retweet it. You need to
+get the harvest timeline script first to gather data
+
+'''
+
 import twitter
 import json
 import pymongo

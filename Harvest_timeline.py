@@ -3,8 +3,6 @@
 Created on Mon Sep 22 19:11:53 2014
 
 @author: tomek
-
-Script for getting tweets from your timeline and save them in a mongoDB database
 """
 
 import twitter
@@ -16,10 +14,10 @@ import sys
 import time
 
 def oauth_login():
-    CONSUMER_KEY = ''
-    CONSUMER_SECRET = ''
-    OAUTH_TOKEN = ''
-    OAUTH_TOKEN_SECRET = ''
+    CONSUMER_KEY = 'CyAip6p31NAft9oaxzOQ6oB8J'
+    CONSUMER_SECRET = 'SQNoR3rSI48CQJNRp0JiYvtjUbO8N92vOp2E6FaziqWs41ZmaQ'
+    OAUTH_TOKEN = '2787485978-M79tv9HsEksFY4CiVDcFyUaU966coOAbILBvjaH'
+    OAUTH_TOKEN_SECRET = 'Nb47C3HKCqZbCSymCos43R0p2T2W6apMp0PYfaQPTl1Qq'
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET,
                                CONSUMER_KEY, CONSUMER_SECRET)
     twitter_api = twitter.Twitter(auth=auth)
@@ -165,7 +163,7 @@ def harvest_home_timeline(twitter_api, max_results=1000):
     tweets_processed = [ dict([('text', tweet["text"]), ('coordinates', tweet["coordinates"]), 
                                ('retweet_count', tweet["retweet_count"]), ('id', tweet["id"]), 
                               ('created_at', tweet["created_at"]), ('user_id', tweet["user"]["id"])
-                              ]) for tweet in tweets]
+                              ]) for tweet in tweets if not tweet["retweeted"] ]
 
     results += tweets_processed
     
@@ -188,7 +186,7 @@ def harvest_home_timeline(twitter_api, max_results=1000):
         tweets_processed = [ dict([('text', tweet["text"]), ('coordinates', tweet["coordinates"]), 
                                ('retweet_count', tweet["retweet_count"]), ('id', tweet["id"]), 
                               ('created_at', tweet["created_at"]), ('user_id', tweet["user"]["id"])
-                              ]) for tweet in tweets]
+                              ]) for tweet in tweets if not tweet["retweeted"]]
         
         results += tweets_processed
 
@@ -199,8 +197,14 @@ def harvest_home_timeline(twitter_api, max_results=1000):
     print >> sys.stderr, 'Done fetching tweets'
 
     return results[:max_results]
+    
+# def get_home_timeline(twitter_api, count=2, since_id=None, exclude_replies=True):
+#    search_results = twitter_api.statuses.home_timeline(count=count)
+#    
+#    return search_results
 
 twitter_api = oauth_login()
 results = harvest_home_timeline(twitter_api)
 
 save_to_mongo(results, 'search_results', 'tweets')
+# load_from_mongo('search_results', 'tweets')

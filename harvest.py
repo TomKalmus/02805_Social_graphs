@@ -4,10 +4,10 @@ import sys
 from pylab import *
 
 def oauth_login():
-    CONSUMER_KEY = 'CyAip6p31NAft9oaxzOQ6oB8J'
-    CONSUMER_SECRET = 'SQNoR3rSI48CQJNRp0JiYvtjUbO8N92vOp2E6FaziqWs41ZmaQ'
-    OAUTH_TOKEN = '2787485978-M79tv9HsEksFY4CiVDcFyUaU966coOAbILBvjaH'
-    OAUTH_TOKEN_SECRET = 'Nb47C3HKCqZbCSymCos43R0p2T2W6apMp0PYfaQPTl1Qq'
+    CONSUMER_KEY = ''
+    CONSUMER_SECRET = ''
+    OAUTH_TOKEN = ''
+    OAUTH_TOKEN_SECRET = ''
     auth = twitter.oauth.OAuth(OAUTH_TOKEN, OAUTH_TOKEN_SECRET,
                                CONSUMER_KEY, CONSUMER_SECRET)
     twitter_api = twitter.Twitter(auth=auth)
@@ -200,16 +200,8 @@ def draw_histogram(list1, list2=None, limit=20000, bins=100, title="Followers hi
     plt.show()
 
 
-# twitter_api = oauth_login()
-# screen_names = read_text('didntfollowback.txt')
-# num_followers = count_statistics(screen_names, twitter_api)
-# screen_names2 = read_text('followed.txt')
-# num_followers2 =  count_statistics(screen_names2, twitter_api)
+twitter_api = oauth_login()
+screen_names = read_text('didntfollowback.txt')
+screen_names2 = read_text('followed.txt')
 draw_histogram(num_followers, list2=num_followers2, limit=500, bins=20)
-# num_friends = count_statistics(screen_names, twitter_api, attribute="friends_count")
-# num_friends2 = count_statistics(screen_names2, twitter_api, attribute="friends_count")
-# draw_histogram(num_friends, list2=num_friends2, limit=5000, bins=50, title="Friends histogram")
-# num_tweet = count_statistics(screen_names, twitter_api, attribute="statuses_count")
-# num_tweet2 = count_statistics(screen_names2, twitter_api, attribute="statuses_count")
-# draw_histogram(num_tweet, list2=num_tweet2, limit=5000, bins=50, title="Tweets histogram")
-#print get_locations(screen_names2, twitter_api)
+print get_locations(screen_names2, twitter_api)
